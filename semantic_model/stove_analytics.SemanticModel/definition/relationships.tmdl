@@ -1,0 +1,17 @@
+relationship feb8ccda-823b-4b90-8ec6-82383149ac7b
+	joinOnDateBehavior: datePartOnly
+	fromColumn: date.Date
+	toColumn: LocalDateTable_53ff5c6a-d0c9-4c19-81b4-4e6c67f483d9.Date
+
+relationship AutoDetected_70e5bea8-906a-4784-9bf6-28deb90b1bc9
+	fromColumn: stove_usage_fact.household_id
+	toColumn: household.household_id
+
+relationship 0b9b34a2-da1d-eb8b-93bb-0cfe554b781d
+	fromColumn: stove_usage_fact.distribution_date
+	toColumn: date.Date
+
+relationship beedaf8a-1983-b493-165e-dac1b749ee28
+	fromColumn: stove_usage_fact.zipcode
+	toColumn: location.zipcode
+

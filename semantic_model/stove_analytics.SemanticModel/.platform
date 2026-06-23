@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "stove_analytics2"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "141fb88f-a98e-465e-bdb8-037a212d3c3e"
+  }
+}

@@ -1,0 +1,83 @@
+table date
+	lineageTag: 8b8c4674-6e6f-4393-85da-676646e3f563
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: f41c405b-dc25-4df4-901f-113254b0a96f
+		summarizeBy: none
+		sourceColumn: Date
+
+		variation Variation
+			isDefault
+			relationship: feb8ccda-823b-4b90-8ec6-82383149ac7b
+			defaultHierarchy: LocalDateTable_53ff5c6a-d0c9-4c19-81b4-4e6c67f483d9.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: dab37e43-37d8-44f8-a1ca-ad98bb997f1c
+		summarizeBy: sum
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		dataType: string
+		lineageTag: d014c78b-30d8-4698-9ebc-38a2700ac1d8
+		summarizeBy: none
+		sourceColumn: Quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Week Number'
+		dataType: int64
+		formatString: 0
+		lineageTag: 79516f0c-ee00-4f76-91ba-3be43c0b2d46
+		summarizeBy: sum
+		sourceColumn: Week Number
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Number'
+		dataType: int64
+		formatString: 0
+		lineageTag: 02d00b22-4f7d-4c2e-9eef-09a9753db0ac
+		summarizeBy: sum
+		sourceColumn: Month Number
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: string
+		lineageTag: 40d2ebe4-94b7-4a50-b431-049b252a5f47
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Day of Week'
+		dataType: string
+		lineageTag: cfe600d2-5298-4a93-8dfc-d10ca90eb7f6
+		summarizeBy: none
+		sourceColumn: Day of Week
+
+		annotation SummarizationSetBy = Automatic
+
+	partition date = m
+		mode: import
+		source =
+				let
+				    Source = delagua_stove_data(#date(2023, 1, 1), #date(2025, 6, 15)),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Date", type date}, {"Year", Int64.Type}, {"Quarter", type text}, {"Week Number", Int64.Type}, {"Month Number", Int64.Type}, {"Month", type text}, {"Day of Week", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

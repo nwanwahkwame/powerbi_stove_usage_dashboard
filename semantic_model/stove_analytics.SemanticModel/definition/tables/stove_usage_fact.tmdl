@@ -1,0 +1,93 @@
+table stove_usage_fact
+	lineageTag: 75fa746c-16e2-4752-9d00-691011866d77
+
+	measure Average_usage = AVERAGE(stove_usage_fact[usage])
+		lineageTag: 5de9b89e-6a26-4c02-b182-52eea7b9c98e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Monthly change' = [Average_usage] - CALCULATE([Average_usage], PREVIOUSMONTH('date'[Date]))
+		lineageTag: a93b1355-25c2-47c2-974e-482c263bc98d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Target = 40
+		formatString: 0
+		lineageTag: 1c555602-8bb9-4c18-adc1-b1a10fbc6abd
+
+	measure Max_usage = 50
+		formatString: 0
+		lineageTag: 6b96a989-5bf4-4058-bb03-728fc53add62
+
+	measure Total_usage = SUM(stove_usage_fact[usage])
+		lineageTag: a5bf4658-1461-4111-a130-c5a539de0a2d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column household_id
+		dataType: string
+		lineageTag: b8e0e965-60a2-4919-b3a1-69716446a6de
+		summarizeBy: none
+		sourceColumn: household_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column zipcode
+		dataType: string
+		lineageTag: 6cc74b5c-7ea1-4bc0-8dc2-a95bdd82dafe
+		summarizeBy: none
+		sourceColumn: zipcode
+
+		annotation SummarizationSetBy = Automatic
+
+	column distribution_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: cfcb7093-40ea-419f-9efb-142cdf4a73d0
+		summarizeBy: none
+		sourceColumn: distribution_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column usage
+		dataType: double
+		lineageTag: a262c682-58f8-4221-b924-a230ba70e778
+		summarizeBy: sum
+		sourceColumn: usage
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Usage category' = SWITCH(TRUE(), stove_usage_fact[usage] < 50, "Low", stove_usage_fact[usage] < 80, "Moderate", "High")
+		lineageTag: b9d29392-4cf1-4c21-b47d-8888bd2d4ff9
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition stove_usage_fact = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\Kwame - PC\Desktop\Blossom\week_15\PowerBI\delagua_stove_data.csv"),[Delimiter=",", Columns=16, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"household_id", type text}, {"district", type text}, {"zipcode", Int64.Type}, {"latitude", type number}, {"longitude", type number}, {"distribution_date", type date}, {"household_size", Int64.Type}, {"baseline_fuel_kg_person_week", type number}, {"distance_to_market_km", type number}, {"elevation_m", Int64.Type}, {"usage_month_1", type number}, {"usage_month_2", type number}, {"usage_month_3", type number}, {"usage_month_4", type number}, {"usage_month_5", type number}, {"usage_month_6", type number}}),
+				    #"Unpivoted Other Columns" = Table.UnpivotOtherColumns(#"Changed Type", {"household_id", "district", "zipcode", "latitude", "longitude", "distribution_date", "household_size", "baseline_fuel_kg_person_week", "distance_to_market_km", "elevation_m"}, "Attribute", "Value"),
+				    #"Split Column by Delimiter" = Table.SplitColumn(#"Unpivoted Other Columns", "Attribute", Splitter.SplitTextByEachDelimiter({"_"}, QuoteStyle.Csv, true), {"Attribute.1", "Attribute.2"}),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Split Column by Delimiter",{{"Attribute.1", type text}, {"Attribute.2", Int64.Type}}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Changed Type1",{"household_id", "zipcode", "distribution_date", "Value"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Other Columns",{{"Value", "usage"}}),
+				    #"Changed Type2" = Table.TransformColumnTypes(#"Renamed Columns",{{"zipcode", type text}, {"distribution_date", type date}}),
+				    #"Changed Type with Locale" = Table.TransformColumnTypes(#"Changed Type2", {{"distribution_date", type date}}, "en-GH"),
+				    #"Replaced Value" = Table.ReplaceValue(#"Changed Type with Locale",null,"unknown",Replacer.ReplaceValue,{"zipcode"})
+				in
+				    #"Replaced Value"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,23 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-GH
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["delagua_stove_data","stove_usage_fact","household","location","date"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table stove_usage_fact
+ref table DateTableTemplate_3a1f45ec-9cd1-4d34-8402-90cffeafeee1
+ref table household
+ref table location
+ref table date
+ref table LocalDateTable_53ff5c6a-d0c9-4c19-81b4-4e6c67f483d9
+
+ref cultureInfo en-US
+

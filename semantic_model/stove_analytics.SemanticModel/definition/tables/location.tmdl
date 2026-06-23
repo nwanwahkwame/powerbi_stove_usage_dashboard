@@ -1,0 +1,100 @@
+table location
+	lineageTag: 43fbaed1-1ec3-46f2-86b3-6838d65e51fe
+
+	measure district_top_usage =
+			
+			VAR top_district = TOPN(1, VALUES(location[district]), [Total_usage], DESC)
+			RETURN
+			MAXX(top_district, location[district])
+		lineageTag: 3439ee75-4312-4e37-9f63-38981f7dce02
+
+	measure district_low_usage =
+			
+			VAR low_district = TOPN(1, VALUES(location[district]), [Total_usage], ASC)
+			RETURN
+			MAXX(low_district, location[district])
+		lineageTag: ce364cc1-028a-4e4b-8790-36b749c72f6d
+
+	measure usage_efficiency = DIVIDE([Average_usage], AVERAGE(household[baseline_fuel_kg_person_week]))
+		lineageTag: 08723bfd-efa1-42c4-8bba-cbd2ec295338
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column district
+		dataType: string
+		lineageTag: e29c01e1-d19d-4e4b-bcf5-0b222d567246
+		summarizeBy: none
+		sourceColumn: district
+
+		annotation SummarizationSetBy = Automatic
+
+	column zipcode
+		dataType: string
+		lineageTag: 4d2e6b3f-a584-449e-a54e-ef15d415df63
+		summarizeBy: none
+		sourceColumn: zipcode
+
+		annotation SummarizationSetBy = Automatic
+
+	column latitude
+		dataType: double
+		lineageTag: 7047275d-faf2-41f2-8cce-aab58e5cd920
+		dataCategory: Latitude
+		summarizeBy: none
+		sourceColumn: latitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column longitude
+		dataType: double
+		lineageTag: 0b9c9992-5841-4dd7-9dd5-54ef96d7d65f
+		dataCategory: Longitude
+		summarizeBy: none
+		sourceColumn: longitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column distance_to_market_km
+		dataType: double
+		lineageTag: 3a55ce03-2af2-47a5-87da-af0aba037e8a
+		summarizeBy: none
+		sourceColumn: distance_to_market_km
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column elevation_m
+		dataType: int64
+		formatString: 0
+		lineageTag: 22475ef8-090a-47f1-b5b5-7ec8444c4588
+		summarizeBy: none
+		sourceColumn: elevation_m
+
+		annotation SummarizationSetBy = Automatic
+
+	partition location = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\Kwame - PC\Desktop\Blossom\week_15\PowerBI\delagua_stove_data.csv"),[Delimiter=",", Columns=16, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"household_id", type text}, {"district", type text}, {"zipcode", Int64.Type}, {"latitude", type number}, {"longitude", type number}, {"distribution_date", type date}, {"household_size", Int64.Type}, {"baseline_fuel_kg_person_week", type number}, {"distance_to_market_km", type number}, {"elevation_m", Int64.Type}, {"usage_month_1", type number}, {"usage_month_2", type number}, {"usage_month_3", type number}, {"usage_month_4", type number}, {"usage_month_5", type number}, {"usage_month_6", type number}}),
+				    #"Unpivoted Other Columns" = Table.UnpivotOtherColumns(#"Changed Type", {"household_id", "district", "zipcode", "latitude", "longitude", "distribution_date", "household_size", "baseline_fuel_kg_person_week", "distance_to_market_km", "elevation_m"}, "Attribute", "Value"),
+				    #"Split Column by Delimiter" = Table.SplitColumn(#"Unpivoted Other Columns", "Attribute", Splitter.SplitTextByEachDelimiter({"_"}, QuoteStyle.Csv, true), {"Attribute.1", "Attribute.2"}),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Split Column by Delimiter",{{"Attribute.1", type text}, {"Attribute.2", Int64.Type}}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Changed Type1",{"district", "zipcode", "latitude", "longitude", "distance_to_market_km", "elevation_m"}),
+				    #"Changed Type2" = Table.TransformColumnTypes(#"Removed Other Columns",{{"zipcode", type text}}),
+				    #"Removed Duplicates" = Table.Distinct(#"Changed Type2", {"zipcode"}),
+				    #"Replaced Value" = Table.ReplaceValue(#"Removed Duplicates",null,"unknown",Replacer.ReplaceValue,{"zipcode"})
+				in
+				    #"Replaced Value"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
