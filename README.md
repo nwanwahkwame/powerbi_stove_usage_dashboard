@@ -41,7 +41,9 @@ The report uses a **star schema** with the following tables:
 ## Repository Contents
 
 ```
+├── data
 ├── screenshots
+├── semantic model
 ├── stove_analytics.pbix   # Power BI report file
 └── README.md
 ```
